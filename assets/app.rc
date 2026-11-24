@@ -1,0 +1,2 @@
+// GPUI loads RT_GROUP_ICON resource 1 for its native window class.
+1 ICON "assets/icon.ico"

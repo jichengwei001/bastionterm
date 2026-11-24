@@ -1,0 +1,168 @@
+{
+  "tools": [
+    {
+      "name": "ssh_start_web",
+      "description": "Start or reuse the desktop background service. Return its actual local web URL; desktop manages the port automatically.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "required": [],
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "ssh_list_profiles",
+      "description": "List saved SSH connection profiles and whether a password is saved. Never returns passwords. Use the requested target profile_id with ssh_connect. If none exist, call ssh_start_web and ask the user to add one in \u8fde\u63a5\u914d\u7f6e.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "required": [],
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "ssh_connect",
+      "description": "Connect or reconnect a disconnected SSH session using a saved profile and local credentials file. Also starts the web UI and broker if stopped. Idempotently reuses an existing matching session; never replaces another target or takes control from the user. On owner=human, wait for the user. After reconnecting, check remote state; never automatically replay interrupted commands. No password argument is accepted; use the web UI for credentials.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "profile_id": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "profile_id"
+        ],
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "ssh_list_sessions",
+      "description": "List all independent host sessions, targets, ownership and active command IDs. Does not connect or change control.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "required": [],
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "ssh_status",
+      "description": "Inspect the explicitly selected SSH session. When disconnected, use ssh_list_profiles then ssh_connect. If owner is human, wait for the user to return control; do not bypass the shared terminal with another connection.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "session_id": {
+            "type": "string",
+            "description": "Exact session_id returned by ssh_connect or ssh_list_sessions",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "session_id"
+        ],
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "ssh_execute",
+      "description": "Execute a Bash command in the persistent PTY. cwd/env persist; output merges stdout/stderr. Commands run serially. If running, use ssh_poll; never replay an uncertain command. Do not change terminal settings, shell options, traps, prompts, or __agent_* variables. Use a subshell for exit, exec, set -e, or interactive programs. Output is bounded to the latest 2M characters.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "session_id": {
+            "type": "string",
+            "description": "Exact session_id returned by ssh_connect or ssh_list_sessions",
+            "minLength": 1
+          },
+          "command": {
+            "type": "string"
+          },
+          "wait": {
+            "type": "number",
+            "default": 10,
+            "minimum": 0,
+            "maximum": 25
+          }
+        },
+        "required": [
+          "session_id",
+          "command"
+        ],
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "ssh_poll",
+      "description": "Read a command result. Supply previous offset for incremental output. Waiting does not cancel.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "session_id": {
+            "type": "string",
+            "description": "Exact session_id returned by ssh_connect or ssh_list_sessions",
+            "minLength": 1
+          },
+          "id": {
+            "type": "string"
+          },
+          "offset": {
+            "type": "integer",
+            "default": 0
+          },
+          "wait": {
+            "type": "number",
+            "default": 0,
+            "minimum": 0,
+            "maximum": 25
+          }
+        },
+        "required": [
+          "session_id",
+          "id"
+        ],
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "ssh_cancel",
+      "description": "Send Ctrl-C to the active foreground command. Disconnect if shell recovery fails.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "session_id": {
+            "type": "string",
+            "description": "Exact session_id returned by ssh_connect or ssh_list_sessions",
+            "minLength": 1
+          },
+          "id": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "session_id",
+          "id"
+        ],
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "ssh_disconnect",
+      "description": "Explicitly close an agent-owned SSH session when requested. Use ssh_connect with a saved profile to connect again. Never disconnect a human-owned session.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "session_id": {
+            "type": "string",
+            "description": "Exact session_id returned by ssh_connect or ssh_list_sessions",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "session_id"
+        ],
+        "additionalProperties": false
+      }
+    }
+  ]
+}

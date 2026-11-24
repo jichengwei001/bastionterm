@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="terminal-token" content="__SESSION_TOKEN__">
+  <title>垒桥终端 · BastionTerm</title>
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="/vendor/xterm.css"><link rel="stylesheet" href="/style.css">
+  <script src="/skins.js"></script>
+  <script src="/vendor/xterm.js" defer></script><script src="/vendor/fit.js" defer></script><script src="/app.js" defer></script>
+</head>
+<body data-desktop="__DESKTOP_MODE__">
+  <header>
+    <div class="brand"><strong>垒桥终端<span class="brand-english"><span class="slash"> / </span>BastionTerm</span></strong><span id="app-version" hidden></span></div>
+    <div class="header-right">
+      <span class="live"><i id="connection-dot"></i><span id="connection">正在连接页面…</span></span>
+      <span id="owner" class="owner">观察模式</span>
+      <button id="skin-settings" aria-haspopup="dialog" title="切换界面与终端皮肤">皮肤</button>
+      <button id="desktop-settings" hidden>MCP 设置</button>
+      <button id="connection-settings">连接配置</button>
+      <button id="takeover" class="primary" title="接管会中断正在运行的 Agent 命令" disabled>接管终端</button>
+      <button id="release" class="primary" title="请先退出 vim、top 等全屏程序，再交还 Agent" hidden>交还 Agent</button>
+    </div>
+  </header>
+  <main>
+    <section class="workspace">
+      <nav class="session-strip" aria-label="主机会话"><div id="session-tabs" role="tablist" aria-label="已连接的主机"></div><button id="add-session" title="连接另一台主机" aria-label="连接另一台主机">＋</button></nav>
+      <div class="terminal-shell" role="tabpanel" id="session-terminal">
+        <div class="terminal-bar"><div class="terminal-title"><span id="terminal-title">SSH</span><span class="route-divider">/</span><span id="route">尚未连接</span></div><div class="terminal-actions"><button id="copy" title="复制选中的文本；未选中时复制可见终端内容">复制</button><button id="clear" title="只清空本页显示，不清除远端内容">清屏</button><button id="fullscreen" title="切换全屏" aria-label="切换全屏">⛶</button></div></div>
+        <div class="terminal-body"><div id="terminal" aria-label="远端交互终端"></div></div>
+        <div class="terminal-footer"><span class="terminal-hint"><i id="mode-dot"></i><span id="hint">正在读取会话…</span></span><div class="footer-actions"><button id="ctrlc" title="发送 Ctrl-C 中断" disabled>Ctrl C</button><button id="escape" disabled>Esc</button><button id="tab" disabled>Tab</button><span id="geometry">— × —</span></div></div>
+      </div>
+      <p id="message" role="status" aria-live="polite"></p>
+    </section>
+    <aside id="history-sidebar" aria-label="Agent 执行记录">
+      <div class="history-rail"><button id="history-toggle" type="button" aria-expanded="false" aria-controls="history-panel" aria-label="展开执行记录" title="展开执行记录">◂</button></div>
+      <div id="history-panel" hidden>
+        <div class="aside-title"><h2>Agent 执行记录</h2><span id="job-count">0</span></div>
+        <div id="jobs"><div class="empty"><p>等待第一条命令</p></div></div>
+      </div>
+    </aside>
+  </main>
+  <dialog id="login" aria-labelledby="login-title">
+    <form id="login-form">
+      <div class="dialog-top"><span class="label">SSH CONNECTIONS</span><button id="close-settings" type="button" aria-label="关闭连接配置">×</button></div>
+      <h2 id="login-title">连接配置</h2><p>保存常用主机，下次直接选择连接。</p>
+      <label>已保存的连接<div class="profile-picker"><select id="profile-select" name="id" aria-label="已保存的连接"><option value="">新建连接</option></select><button id="new-profile" type="button">新建</button><button id="delete-profile" type="button" disabled>删除</button></div></label>
+      <label>连接名称<input name="name" placeholder="例如：测试服务器" maxlength="120"></label>
+      <label>主机<input name="host" value="" autocomplete="off" required></label>
+      <div class="login-row"><label>端口<input name="port" type="number" min="1" max="65535" value="22" required></label><label>账号<input name="user" value="" autocomplete="username" required></label></div>
+      <label>密码<input name="password" type="password" autocomplete="new-password" placeholder="输入 SSH 密码"></label>
+      <div class="save-options"><label><input name="save_profile" type="checkbox" checked>保存连接配置</label><label><input name="remember_password" type="checkbox" checked>保存密码到本机配置文件</label></div>
+      <p id="password-status">密码以明文保存在本机配置文件（权限 0600），不会回填到页面。</p><p id="profile-session-note"></p>
+      <p id="login-error" role="status" aria-live="polite"></p>
+      <div class="profile-actions"><button id="save-profile" type="submit" name="intent" value="save">保存配置</button><button id="connect-profile" class="primary" type="submit" name="intent" value="connect">连接远端</button></div>
+    </form>
+  </dialog>
+<dialog id="desktop-dialog"><div class="dialog-top"><h2>桌面与 MCP</h2><button id="close-desktop" aria-label="关闭">×</button></div><p>关闭桌面窗口默认最小化；从“垒桥终端”菜单选择“退出垒桥终端与后台”会断开 SSH 并停止后台。</p><p id="desktop-data"></p><label>客户端<select id="desktop-client"><option value="mcp_config">通用 MCP</option><option value="pi_config">pi agent</option></select></label><textarea id="desktop-config" readonly aria-label="MCP 配置"></textarea><button id="copy-desktop">复制配置</button><p id="desktop-note">将 baoleiji-pty 条目合并到客户端配置，保留其他服务，然后重启客户端。</p></dialog>
+<dialog id="skin-dialog" aria-labelledby="skin-heading"><div class="dialog-top"><h2 id="skin-heading">选择皮肤</h2><button id="close-skin" aria-label="关闭皮肤设置">×</button></div><p>界面与终端一起换色，即选即用。</p><div id="skin-grid" aria-label="可用皮肤"></div><p id="skin-note" role="status">选择会保存在当前浏览器中。</p></dialog>
+<dialog id="confirm-dialog" aria-labelledby="confirm-title" aria-describedby="confirm-detail">
+  <form method="dialog">
+    <h2 id="confirm-title"></h2><p id="confirm-detail"></p>
+    <div class="confirm-actions"><button id="confirm-cancel" value="cancel" autofocus>取消</button><button id="confirm-accept" class="danger" value="confirm">确认</button></div>
+  </form>
+</dialog>
+</body>
+</html>

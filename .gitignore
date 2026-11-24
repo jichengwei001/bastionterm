@@ -1,0 +1,15 @@
+/target/
+
+/dist/
+.runtime/
+.connections/
+credentials.json
+profiles.json
+sessions.json
+service.json
+known_hosts
+.env
+.env.*
+*.log
+.DS_Store
+__pycache__/
