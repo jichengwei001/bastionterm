@@ -16,6 +16,8 @@ BastionTerm gives your agent and your terminal the same SSH shell. It works with
 2. 登录后点「MCP 设置」，把生成的配置合并到 Agent 客户端，重新加载客户端。
 3. 告诉 Agent「在刚配置的主机运行 `pwd`」。你会看到实时输出，点「接管终端」即可操作同一个 shell。
 
+![两个本地测试主机标签，以及 staging 会话中 MCP 命令的实时输出和执行记录](https://raw.githubusercontent.com/jichengwei001/bastionterm/v0.2.41/docs/terminal.jpg)
+
 ## 使用桌面终端
 
 macOS 解压后打开完整的 BastionTerm.app。Windows 原生构建生成一个 BastionTerm.exe。顶部的「连接配置」或「＋」可以新建、修改、删除配置或连接主机。连接配置中可用 ↑ 和 ↓ 调整端口，按主机名称的开头可在列表中查找配置。保存密码后可留空沿用。改变主机、账号或端口后需重新输入密码。取消保存配置可以只连接一次。

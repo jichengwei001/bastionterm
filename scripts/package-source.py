@@ -10,7 +10,7 @@ destination.mkdir(parents=True, exist_ok=True)
 version = re.search(r'^version = "([^"]+)"', (root / "Cargo.toml").read_text(), re.M)[1]
 files = [root / name for name in (
     "LICENSE", "THIRD-PARTY.md", "Cargo.toml", "Cargo.lock", "build.rs", "README.md", "MCP配置与Agent提示词.md", ".gitignore")]
-for directory in ("src", "assets", "scripts", "checks", "vendor"):
+for directory in ("src", "assets", "scripts", "checks", "vendor", "docs", ".github/workflows"):
     files.extend(p for p in sorted((root / directory).rglob("*"))
                  if p.is_file() and not p.name.startswith(".")
                  and "__pycache__" not in p.parts and p.suffix not in (".log", ".pyc"))
