@@ -1,0 +1,36 @@
+name: Build Windows package
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/windows.yml'
+permissions:
+  contents: read
+jobs:
+  windows:
+    runs-on: windows-2025
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Select the stable MSVC toolchain
+        run: rustup update stable --no-self-update
+      - name: Build the portable ZIP
+        shell: pwsh
+        run: |
+          $env:RUSTUP_TOOLCHAIN = 'stable'
+          ./scripts/package-windows.ps1
+      - name: Run Rust tests
+        run: cargo +stable test --locked --release
+      - name: Exercise the packaged MCP service
+        shell: pwsh
+        run: |
+          $zip = Get-Item dist/*-windows-x64.zip
+          Expand-Archive -LiteralPath $zip.FullName -DestinationPath "$env:RUNNER_TEMP/package"
+          python checks/mcp-stdio.py "$env:RUNNER_TEMP/package/BastionTerm.exe"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: bastionterm-windows-x64
+          path: dist/*-windows-x64.zip
+          if-no-files-found: error
