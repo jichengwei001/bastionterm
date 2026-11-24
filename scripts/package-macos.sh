@@ -27,6 +27,7 @@ cat > "$contents/Info.plist" <<PLIST
 </dict></plist>
 PLIST
 codesign --force --sign - "$stage/BastionTerm.app"
+cp -R docs "$stage/"
 cp LICENSE THIRD-PARTY.md README.md MCP配置与Agent提示词.md assets/OFL.txt assets/LICENSE-GPUI assets/LICENSE-vt100 assets/LICENSE-ICU4X assets/LICENSE-muda assets/browser/LICENSE-fit assets/browser/LICENSE-xterm "$stage/"
 case "$arch" in
     arm64) triple=aarch64-apple-darwin ;;

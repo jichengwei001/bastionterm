@@ -15,6 +15,7 @@ try {
     New-Item -ItemType Directory $stage | Out-Null
     try {
         Copy-Item (Join-Path $meta.target_directory 'release/bastion-bridge-gpui.exe') (Join-Path $stage 'BastionTerm.exe')
+        Copy-Item -Recurse docs (Join-Path $stage 'docs')
         Copy-Item LICENSE,*.md,assets/OFL.txt,assets/LICENSE-GPUI,assets/LICENSE-vt100,assets/LICENSE-ICU4X,assets/LICENSE-muda,assets/browser/LICENSE-xterm,assets/browser/LICENSE-fit $stage
         python scripts/dependency-notices.py x86_64-pc-windows-msvc (Join-Path $stage 'DEPENDENCY-NOTICES.txt')
         if ($LASTEXITCODE -ne 0) { throw 'Dependency notices failed' }
